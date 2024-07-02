@@ -1,0 +1,77 @@
+Eksctl Installation:
+======================
+
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+sudo mv /tmp/eksctl /usr/local/bin
+
+eksctl -version
+
+Creating Cluster using eksctl yaml file:
+=========================================
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: basic-cluster
+  region: ap-south-1
+nodeGroups:
+  - name: ng-1
+    instanceType: m5.large
+    desiredCapacity: 10
+    ssh:
+      allow: true # will use ~/.ssh/id_rsa.pub as the default ssh key #you can use anything allow or keyname
+      publicKeyName: <keyname> 
+
+
+  Command to create EKS cluster:
+================================
+
+ -->  eksctl create cluster --name demo --region ap-south-1 --version 1.26 --nodegroup-name linux-nodes --node-type t2.micro --nodes 2
+
+Command to delete cluster:
+==========================
+ 
+ --> eksctl delete cluster --region=ap-south-1 --name=demo
+
+Kubeconfig Command:
+=====================
+
+aws eks update-kubeconfig --region <your-region> --name <your cluster name>
+
+
+
+If you encounter any issues while creating cluster, check CloudFormation console or try 
+'eksctl utils describe-stacks --region=us-east-1 --cluster=demo'
+
+
+Sample kubeconfig file of EKS Cluster:
+
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJVjR1bEdhRjBBUlF3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBMk1EWXdPVFV5TXpOYUZ3MHpOREEyTURRd09UVTNNek5hTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUMrNzJ0MmdDV2RuWDlLZlNybkZwYTRkcjlLaldEWWFnTVJpcFpGRW1JSzh5NXpXRGFiK0JlQ3pSTGgKNFc4N0tMcEhrRWtuY3cvZkh4WDFzVWNPMktkVlZOK1BablFoRGlHQjZ2VlNGMzlOaVcvUTk3MThWNTFTNGlmUApLaHN5aktsQ3VyY0wxb0UxaVNlSW5VWWlVYzh2SWJ6RHFveWlRR0xVYmFkQVVhUVR2Mzg4NUxGSWFLZGFYTmdLCkJhSlhKUzRKT0EwaVo4MldqeUhFTUptdVlObE9XMEJFWDNkWGVtTXlDakdqZVJBbDFCc2M3VHJiK1F2UmtHQkoKQlc0eWhGNzZGcG9UUkhvc3VrNGdXTExLU09SYzF3b1FFYk9YSXYvOGIreTlHb3dKSjg1NlBVWFVxUGNpVm8wdwp3T3E3YXhZbWJZcHkxK1B5OGpYc1FtTTJXRjVKQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJSRlJqMjc2QUJsRy9haHFVb3ROdWRYM2gwRWl6QVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQ3hNcktVUlhKaQovYUwrSkIwUmhJQklQUE1jM29VM3BUMU9OZXN3dlVEWlE0Q21sOXdKRmNWQVdCbjZvZUw3NDlacW0rNEttNG04CkdDVm5TZS8vaU4rYVkrZzRWTWFOQVdHSHoyWEhJeWwzV21CcEtuYWtMTUdjeW80MXNoYWhET3VYZGhuQ0hVY3YKYXBUWEdNQXJpWXpQZVFpQTJpandXZTF5YUt3OFgvaTIxcDcwQlErYnpOanJ4dzNEczJTTUdqRzJqeDMrSldWQgpIaHpQN3c4VnRvbGV5MXl5Z1VpYy9Yb1dsQXhORGVZYU9FV0JjUEZLTldRaEgxZk9EbmZHM1ZEU0FLN1VJb3NTCmhwVVVORWZpZHVWeUhmUE9OdlpFaUxOeXRSbk5yVjFkeGVoNk52cXR4Wnk3MVpXQ0JYKzZNai9RbE9SRFVuV2wKbkRDKzNVZXh2MUdDCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    server: https://B9287D509BFF0210C4B60612187DF5BA.gr7.ap-south-1.eks.amazonaws.com
+  name: arn:aws:eks:ap-south-1:654654160412:cluster/demo
+contexts:
+- context:
+    cluster: arn:aws:eks:ap-south-1:654654160412:cluster/demo
+    user: arn:aws:eks:ap-south-1:654654160412:cluster/demo
+  name: arn:aws:eks:ap-south-1:654654160412:cluster/demo
+current-context: arn:aws:eks:ap-south-1:654654160412:cluster/demo
+kind: Config
+preferences: {}
+users:
+- name: arn:aws:eks:ap-south-1:654654160412:cluster/demo
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1beta1
+      args:
+      - --region
+      - ap-south-1
+      - eks
+      - get-token
+      - --cluster-name
+      - demo
+      - --output
+      - json
+      command: aws

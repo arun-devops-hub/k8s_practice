@@ -1,0 +1,16 @@
+Key Differences
+Selector Syntax:
+
+ReplicationController: Only supports equality-based selectors.
+ReplicaSet: Supports both equality-based and set-based selectors, offering more flexibility.
+Use Cases:
+
+ReplicationController: Considered legacy and primarily used for backward compatibility.
+ReplicaSet: Recommended for new applications and used as a building block for Deployments.
+Advanced Features:
+
+ReplicaSet: Can be part of Deployments, which provide advanced features like rolling updates, rollbacks, and declarative updates to pods and ReplicaSets.
+API Versions:
+
+ReplicationController: Part of the core/v1 API group.
+ReplicaSet: Part of the apps/v1 API group.

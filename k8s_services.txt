@@ -1,0 +1,47 @@
+What is a Kubernetes service?
+Kubernetes Services are resources that map network traffic to the Pods in your cluster. You need to create a Service each time you expose a set of Pods over the network, whether within your cluster or externally.
+
+Kubernetes Services are API objects that enable network exposure for one or more cluster Pods. Services are integral to the Kubernetes networking model and provide important abstractions of lower-level components, which could behave differently between different clouds.
+
+Note: The term “service” is often used generically by other tools to refer to an app, workload, or deployment. However, a Kubernetes Service is a specific type of entity that always provides network access to an app or component.
+
+  Why Services are needed in Kubernetes?
+  Services are necessary because of the distributed architecture of Kubernetes clusters. Apps are routinely deployed as Pods that could have thousands of replicas, spanning hundreds of physical compute Nodes. When a user interacts with your app, their request needs to be routed to any one of the available replicas, regardless of where it’s placed.
+
+  Services sit in front of your Pods to achieve this behavior. All network traffic flows into the Service before being redirected to one of the available Pods. Your other apps can then communicate with the service’s IP address or DNS name to reliably access the Pods you’ve exposed.
+
+  DNS for Services is enabled automatically through the Kubernetes service discovery system. Each Service is assigned a DNS A or AAAA record in the format <service-name>.<namespace-name>.svc.cluster-domain—a service called demo in the default namespace will be accessible within a cluster.local cluster at demo.default.svc.cluster.local, for example. This enables reliable in-cluster networking without having to lookup service IP addresses.
+
+  Kubernetes Service types
+  All Kubernetes Services ultimately forward network traffic to a set of Pods they represent. However, several different types of Service exist with their own characteristics and use cases. Here’s how the five currently available options compare.
+
+  1. ClusterIP Services
+  ClusterIP Services assign an IP address that can be used to reach the Service from within your cluster. This type doesn’t expose the Service externally.
+
+  ClusterIP is the default service type used when you don’t specify an alternative option. It’s the most common kind of service you’ll use as it enables simple internal networking for your workloads.
+
+  2. NodePort Services
+  NodePort Services are exposed externally through a specified static port binding on each of your Nodes. Hence, you can access the Service by connecting to the port on any of your cluster’s Nodes. NodePort Services are also assigned a cluster IP address that can be used to reach them within the cluster, just like ClusterIP Services.
+
+Use of NodePort Services is generally unadvisable. They have functional limitations and can lead to security issues:
+
+  Anyone who can connect to the port on your Nodes can access the Service.
+  Each port number can only be used by one NodePort Service at a time to prevent conflicts.
+  Every Node in your cluster has to listen to the port by default, even if they’re not running a Pod that’s included in the Service.
+No automatic load-balancing: clients are served by the Node they connect to.
+  When a NodePort Service is used, it’s generally to facilitate the use of your own load-balancing solution that reroutes traffic from outside the cluster. NodePorts can also be convenient for temporary debugging, development, and troubleshooting scenarios where you need to quickly test different configurations.
+
+  3. LoadBalancer Services
+  LoadBalancer Services are exposed outside your cluster using an external load balancer resource. This requires a connection to a load balancer provider, typically achieved by integrating your cluster with your cloud environment. Creating a LoadBalancer service will then automatically provision a new load balancer infrastructure component in your cloud account. This functionality is automatically configured when you use a managed Kubernetes service such as Amazon EKS or Google GKE.
+
+  Once you’ve created a LoadBalancer service, you can point your public DNS records to the provisioned load balancer’s IP address. This will then direct traffic to your Kubernetes Service. Therefore, LoadBalancers are the Service type you should normally use when you need an app to be accessible outside Kubernetes.
+
+  4. ExternalName Services
+  ExternalName Services allow you to conveniently access external resources from within your Kubernetes cluster. Unlike the other Service types, they don’t proxy traffic to your Pods.
+
+  When you create an ExternalName Service, you have to set the spec.externalName manifest field to the external address you want to route to (such as example.com). Kubernetes then adds a CNAME DNS record to your cluster that resolves the Service’s internal address (such as my-external-service.app-namespace.svc.cluster.local) to the external address (example.com). This allows you to easily change the external address in the future, without having to reconfigure the workloads that refer to it.
+
+  5. Headless Services
+  Headless services are a special type of Service that don’t provide load balancing or a cluster IP address. They’re “headless” because Kubernetes doesn’t automatically proxy any traffic through them. This allows you to use DNS lookups to discover the individual IP addresses of any Pods selected by the Service.
+
+  A headless service is useful when you want to interface with other service discovery systems without kube-proxy interfering. You can create one by specifically setting a Service’s spec.clusterIP field to the None value.

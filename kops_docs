@@ -1,0 +1,102 @@
+Kubernetes Installation Using KOPS on EC2
+Create an EC2 instance or use your personal laptop.
+Dependencies required
+
+Python3
+AWS CLI
+kubectl
+Install dependencies:
+===================
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y python3-pip apt-transport-https kubectl
+pip3 install awscli --upgrade
+export PATH="$PATH:/home/ubuntu/.local/bin/"
+Install KOPS (our hero for today)
+curl -LO https://github.com/kubernetes/kops/releases/download/$(curl -s https://api.github.com/repos/kubernetes/kops/releases/latest | grep tag_name | cut -d '"' -f 4)/kops-linux-amd64
+
+chmod +x kops-linux-amd64
+
+sudo mv kops-linux-amd64 /usr/local/bin/kops
+
+Provide the below permissions to your IAM user. If you are using the admin user, the below permissions are available by default:
+
+AmazonEC2FullAccess
+AmazonS3FullAccess
+IAMFullAccess
+AmazonVPCFullAccess
+
+Set up AWS CLI configuration on your EC2 Instance or Laptop:
+
+Run "aws configure" and enter your secret and access keys.
+
+Kubernetes Cluster Installation:
+=================================
+Please follow the steps carefully and read each command before executing.
+
+Create S3 bucket for storing the KOPS objects:
+==========
+aws s3api create-bucket --bucket kops-abhi-storage --region us-east-1
+Create the cluster:
+==================
+kops create cluster --name=demok8scluster.k8s.local --state=s3://kops-abhi-storage --zones=us-east-1a --node-count=1 --node-size=t2.micro --master-size=t2.micro  --master-volume-size=8 --node-volume-size=8
+
+Important: Edit the configuration as there are multiple resources created which won't fall into the free tier.
+kops edit cluster myfirstcluster.k8s.local
+
+Step 12: Build the cluster:
+=========================
+
+kops update cluster demok8scluster.k8s.local --yes --state=s3://kops-abhi-storage
+This will take a few minutes to create............
+
+After a few mins, run the below command to verify the cluster installation.
+
+kops validate cluster demok8scluster.k8s.local
+
+kops create cluster --name=arundevops.xyz --state=s3://kops-arunp-storage --zones=us-east-1a,us-east-1b,us-east-1c --node-count=3 --master-count=1 --node-size=t2.micro --master-size=t2.medium --master-zones=us-east-1a --master-volume-size 10 --node-volume-size 10 --ssh-public-key ~/.ssh/id_ed25519.pub --dns-zone=arundevops.xyz --yes
+
+Retrieve the kubeconfig File
+kops manages your kubeconfig file, which kubectl uses to communicate with the cluster. Run the following command to export the cluster configuration to your kubeconfig file.
+
+kops export kubecfg --name <cluster-name>
+Replace <cluster-name> with the name of your cluster (e.g., mycluster.k8s.local).
+
+3. Verify the kubeconfig File
+Ensure that the kubeconfig file has been updated correctly. You can check the current context to see if it points to your kops cluster.
+
+kubectl config current-context
+You should see the context of your kops cluster.
+
+4. Access the Cluster
+Now, you should be able to interact with your cluster using kubectl.
+
+Check the Nodes:
+===============
+kubectl get nodes
+Check the Pods in All Namespaces:
+
+kubectl get pods --all-namespaces
+
+Troubleshooting:
+================
+
+If you encounter any issues, here are a few troubleshooting tips:
+
+1. Ensure Correct kubeconfig Path
+Make sure kubectl is using the correct kubeconfig file. By default, kubectl uses the ~/.kube/config file. You can specify a different kubeconfig file using the KUBECONFIG environment variable.
+
+export KUBECONFIG=~/.kube/config
+2. Check AWS Permissions
+Ensure that the IAM user or role you are using has the necessary permissions to interact with the Kubernetes cluster and related AWS resources.
+
+3. Network Access
+Ensure your client machine has network access to the Kubernetes API server. This may require appropriate VPC settings, security groups, and public IPs.
+
+4. Verify kops Cluster State
+Check the state of your kops cluster to ensure it is running correctly.
+
+kops validate cluster --name <cluster-name>
+Summary
+By following these steps, you can configure your client machine to access a Kubernetes cluster created with kops. This setup allows you to manage your cluster and its resources using kubectl from your client machine. Ensure that your AWS CLI is configured correctly, and your kubeconfig file is correctly set up for seamless access to your Kubernetes cluster.

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx # this should match the label of deployment
+  ports:
+  - port: 80
+    targetPort: 80 
+
+#Adding this Service to your cluster will attempt to use the configured load balancer integration to provision a new infrastructure
+#component. If you created your cluster from a managed cloud service, this should result in a load balancer resource being added to 
+#your cloud account.

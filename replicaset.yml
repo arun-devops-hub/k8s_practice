@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-demo
+  labels:
+    name: httpd
+    tier: frontend
+spec:
+  selector:
+    matchLabels:
+      tier: frontend
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+        - name: httpd-cont
+          image: httpd:latest
+          ports:
+          - containerPort: 80
+
